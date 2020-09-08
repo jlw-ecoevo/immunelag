@@ -1,12 +1,15 @@
 
+# JLW - 2020
 
+# Analysis of experimental data and comparison with model expectations
 
+# Load packages
 library(deSolve)
 library(dplyr)
 library(ggplot2)
 library(ggpubr)
 
-
+# Finds 95% confidence intervals for experimental data
 bootMeanCI <- function(x, n = 1000){
   boot.samples <- matrix(sample(x, size = n*length(x), replace = TRUE), 
                          n, 
@@ -15,7 +18,7 @@ bootMeanCI <- function(x, n = 1000){
   return(quantile(x,c(0.025,0.975)))
 }
 
-
+# System of differential equations for system with lag in batch culture
 lagSystem <- function(t, state, parameters) {
   with(as.list(c(state, parameters)),{
     # rate of change
@@ -29,6 +32,7 @@ lagSystem <- function(t, state, parameters) {
   }) # end with(as.list ...
 }
 
+# Initialize and run CRISPR x SM competition in silico, can iterate for serial transfer (feature not used in manuscript)
 competeXY <- function(V0,phi,dpi=1,re_add_phage=T,daylen=24,kappa=0){
   parameters <- c(e=5e-7,
                   v=2,
@@ -74,6 +78,7 @@ competeXY <- function(V0,phi,dpi=1,re_add_phage=T,daylen=24,kappa=0){
   return(rel_fit)
 }
 
+# Runs competition experiments over a range of viral titres
 titreProfile <- function(phi,kappa,v_range=10^seq(0,11,1)){
   fitness <- numeric()
   for(v in v_range){
@@ -87,47 +92,46 @@ titreProfile <- function(phi,kappa,v_range=10^seq(0,11,1)){
   return(fitness)
 }
 
+# Load experimental data
 setwd("~/immunelag/Fig3")
+## Experiments performed by us
 cur_exp <- read.csv("experiment.csv") %>% subset(select=c(Titre,Fitness))
 cur_exp$Source <- "Current"
+## Westra et al. 2015 Fig S3F (personal communitcation)
 EW_exp <- data.frame(Titre =c(1e7/6,1e8/6,3e8/6), 
                      Fitness = c(1.95,0.28,0.014),
                      Source="Westra et al.")
+## Alseth et al. 2019 Fig 2 (supplement)
 EA_exp <- read.csv("alseth.csv",stringsAsFactors = F)  %>% 
-  subset(Treatment %in% c("Monoculture (BIM2 + SM only)","Monoculture (BIM2 + SM)")) %>%
+  subset(Treatment %in% c("Monoculture (BIM2 + SM only)","Monoculture (BIM2 + SM)")) %>% # Two conditions are the same (personal communication)
   subset(select=c(Phage.titre,CRISPR..BIM2..fitness))
 names(EA_exp) <- c("Titre","Fitness")
 EA_exp$Source <- "Alseth et al."
 EA_exp$Titre <- gsub("[\\^]","e",EA_exp$Titre) %>% 
   gsub(pattern="10e",replace="1e") %>%
   as.numeric()
-EA_exp$Titre <- EA_exp$Titre/6
+EA_exp$Titre <- EA_exp$Titre/6 # reported as PFU not PFU/mL (in 6mL media)
 
+
+# Is the drop in fitness at high viral titre in our experiments significant (yes)
 anova.test <- aov(Fitness~factor(Titre),data=cur_exp)
 summary(anova.test)
 TukeyHSD(anova.test)
 
-
+# Run model for comparison to our experiments (short lag)
 v_range <- 10^seq(3,11,0.1)
 x <- titreProfile(phi=1e3,kappa=0,v_range=v_range)
 model_df <- data.frame(v=v_range,
                        fitness=x,
                        stringsAsFactors = F)
-v_range <- 10^seq(3,11,0.1)
-x <- titreProfile(phi=4/3,kappa=0,v_range=v_range)
-model_df_low <- data.frame(v=v_range,
-                           fitness=x,
-                           stringsAsFactors = F)
 
-
-
+# Plot our experiments w/ model comparison
 mean_exp <- cur_exp %>% group_by(Titre) %>% 
   summarise(MeanFitness=mean(Fitness),
             LowerCI=bootMeanCI(Fitness,n=1e5)[1],
             UpperCI=bootMeanCI(Fitness,n=1e5)[2])
 p1 <- ggplot() + 
   geom_line(data=model_df,aes(x=v_range,y=fitness),color="#d95f02",lwd=1) +
-  #geom_line(data=model_df_low,aes(x=v_range,y=fitness),color="red",lwd=0.5,alpha=0.5) +
   geom_point(data = mean_exp,
              aes(x=Titre,y=MeanFitness))  +
   geom_errorbar(data = mean_exp,
@@ -147,19 +151,18 @@ p1 <- ggplot() +
   scale_y_continuous(breaks=c(0,0.25,0.5,0.75,1)) + 
   geom_text(data=data.frame(x=c(3e10),y=c(0.75)),aes(x=x,y=y),color="#d95f02",label=expression(phi * "=" *1000),size=7)
 
-## Alseth et al data
-
+# Run model for comparison to Alseth et al. experiments (long lag)
 v_range_EA <- 10^seq(0,10,0.1)
 x <- titreProfile(phi=10,kappa=0,v_range=v_range_EA)
 model_df_EA <- data.frame(v=v_range_EA,
                        fitness=x,
                        stringsAsFactors = F)
 
+# Plot Alseth et al. experiments w/ model comparison
 mean_exp_EA <- EA_exp %>% group_by(Titre) %>% 
   summarise(MeanFitness=mean(Fitness),
             LowerCI=bootMeanCI(Fitness,n=1e5)[1],
             UpperCI=bootMeanCI(Fitness,n=1e5)[2])
-
 p2 <- ggplot() + 
   geom_line(data=model_df_EA,aes(x=v,y=fitness),color="#7570b3",lwd=1) +
   geom_point(data = mean_exp_EA,
@@ -177,20 +180,21 @@ p2 <- ggplot() +
 
 
 
-## Westra et al data
-
+# Run model for comparison to Westra et al. experiments (long lag)
+# High SM cost
 v_range_EW <- 10^seq(0,10,0.1)
 x <- titreProfile(phi=10,kappa=0.15,v_range=v_range_EW)
 model_df_cost_EW <- data.frame(v=v_range_EW,
                            fitness=x,
                            stringsAsFactors = F)
+# No SM cost
 v_range_EW <- 10^seq(0,10,0.1)
 x <- titreProfile(phi=10,kappa=0,v_range=v_range_EW)
 model_df_EW <- data.frame(v=v_range_EW,
                            fitness=x,
                            stringsAsFactors = F)
 
-
+# Plot Westra et al. experiments w/ model comparison
 p3 <- ggplot() + 
   geom_line(data=model_df_cost_EW,aes(x=v,y=fitness),color="#7570b3",lwd=0.5,lty=2) +
   geom_line(data=model_df_EW,aes(x=v,y=fitness),color="#7570b3",lwd=1) +
@@ -216,9 +220,7 @@ p3 <- ggplot() +
             size=3,color="black") + 
   geom_text(data=data.frame(x=c(2e5),y=c(0.7)),aes(x=x,y=y),color="#7570b3",label=expression(phi * "=" * 10),size=7)
 
-## Put it together
-
-
+# Put it together
 setwd("~/immunelag/Fig3")
 pdf(paste0("CRISPRxSM_allexperiments.pdf"),width=6,height=10)
 ggarrange(p1,

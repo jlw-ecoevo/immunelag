@@ -1,11 +1,15 @@
 
+# JLW -2020
 
-#Early infection dynamics during an outbreak (24 hrs w/ susceptible initial population)
+# Early infection dynamics during an outbreak (24 hrs w/ susceptible initial population)
+# Panels A, B, C
 
+# Load Packages
 library(deSolve)
 library(ggsci)
 library(scales)
 
+# Lag System
 autoimmunitySystem <- function(t, state, parameters) {
   with(as.list(c(state, parameters)),{
     # rate of change
@@ -30,6 +34,7 @@ autoimmunitySystem <- function(t, state, parameters) {
   }) # end with(as.list ...
 }
 
+# System of ODEs w/out lag
 autoimmunitySystemNoLag <- function(t, state, parameters) {
   with(as.list(c(state, parameters)),{
     # rate of change
@@ -54,6 +59,7 @@ autoimmunitySystemNoLag <- function(t, state, parameters) {
   }) # end with(as.list ...
 }
 
+# Helper function to change parameters
 getParameters <- function(w=0.3,
                 r0=350,
                 e=5e-7,
@@ -85,6 +91,7 @@ getParameters <- function(w=0.3,
   return(parameters)
 }
 
+# Helper function to change initial conditions
 getInitial <- function(R=350,
                        U=1e8,
                        I=0,
@@ -104,6 +111,7 @@ getInitial <- function(R=350,
   return(state)
 }
 
+# Helper function to plot model output
 plotOut <- function(out,main=""){
   par(mar=c(5.1, 5, 4.1, 1))
   plot(out[,"time"],out[,"U"],type="l",
@@ -119,9 +127,11 @@ plotOut <- function(out,main=""){
 }
 
 
+# Time range and initial conditions for numerical soln
 times <- seq(0, 24, by = 1)
 state <- getInitial(V=100)
 
+# Run model w/ no, short, long lags
 parameters <- getParameters(v0=100,kappa=0.01,phi=10)
 out_immunization_longlag <- ode(y = state, 
            times = times, 
@@ -141,12 +151,14 @@ out_immunization_nolag <- ode(y = state,
            parms = parameters,
            method="lsoda")
 
+#save model output
 setwd("~/immunelag/Fig4")
 save(out_immunization_nolag,
      out_immunization_shortlag,
      out_immunization_longlag,
      file = "immunizationlag.RData")
 
+# Plot
 setwd("~/immunelag/Fig4")
 pdf(paste0("ImmunizationLag.pdf"),width=12,height=4)
 par(mfrow=c(1,3))
@@ -157,7 +169,7 @@ par(mfrow=c(1,3))
 dev.off()
 
 
-# Very costly surface mutant
+# Very costly surface mutant (kappa = 0.1, otherwise same as above)
 
 parameters <- getParameters(v0=100,kappa=0.1,phi=10)
 out_immunization_longlag_costlysm <- ode(y = state, 

@@ -1,6 +1,6 @@
 
-
-#Early infection dynamics
+# JLW - 2020
+# Runs outbreak model w/ different growth rates
 
 library(deSolve)
 library(ggsci)

@@ -1,6 +1,8 @@
 
+# JLW - 2020
 
-#Early infection dynamics
+# Infection dynamics under repeated outbreaks
+# Panels D and E
 
 library(deSolve)
 library(ggsci)
@@ -8,6 +10,7 @@ library(scales)
 library(wesanderson)
 library(dplyr)
 
+# ODEs
 autoimmunitySystem <- function(t, state, parameters) {
   with(as.list(c(state, parameters)),{
     # rate of change
@@ -32,7 +35,7 @@ autoimmunitySystem <- function(t, state, parameters) {
   }) # end with(as.list ...
 }
 
-
+# ODEs w/out lag
 autoimmunitySystemNoLag <- function(t, state, parameters) {
   with(as.list(c(state, parameters)),{
     # rate of change
@@ -57,6 +60,7 @@ autoimmunitySystemNoLag <- function(t, state, parameters) {
   }) # end with(as.list ...
 }
 
+# ODEs for system w/ CRISPR that can be upregulated
 autoimmunitySystemInducible <- function(t, state, parameters) {
   with(as.list(c(state, parameters)),{
     # rate of change
@@ -84,7 +88,7 @@ autoimmunitySystemInducible <- function(t, state, parameters) {
 }
 
 
-
+# Helper function
 getParameters <- function(w=0.3,
                 r0=350,
                 e=5e-7,
@@ -118,6 +122,7 @@ getParameters <- function(w=0.3,
   return(parameters)
 }
 
+# Helper function
 getInitial <- function(R=350,
                        U=0,
                        I=0,
@@ -137,6 +142,7 @@ getInitial <- function(R=350,
   return(state)
 }
 
+# Helper function
 getInitialInducible <- function(R=350,
                        U=0,
                        I=0,
@@ -158,7 +164,8 @@ getInitialInducible <- function(R=350,
   return(state)
 }
 
-
+# Run repeated outbreaks (affecting CRISPR and SM) at set intervals w/ set fraction
+# of defended host converted to susceptible
 iterateOutbreak <- function(time_to_outbreak,parameters,state,frac_suscept_outbreak,n_iter=5,solver="lsoda"){
   times <- seq(0, time_to_outbreak, by = 1)
   out <- numeric()
@@ -181,8 +188,6 @@ iterateOutbreak <- function(time_to_outbreak,parameters,state,frac_suscept_outbr
   }
   return(out)
 }
-
-
 iterateOutbreakNoLag <- function(time_to_outbreak,parameters,state,frac_suscept_outbreak,n_iter=5,solver="lsoda"){
   times <- seq(0, time_to_outbreak, by = 1)
   out <- numeric()
@@ -205,9 +210,6 @@ iterateOutbreakNoLag <- function(time_to_outbreak,parameters,state,frac_suscept_
   }
   return(out)
 }
-
-
-
 iterateOutbreakInducible <- function(time_to_outbreak,parameters,state,frac_suscept_outbreak,n_iter=5,solver="lsoda"){
   times <- seq(0, time_to_outbreak, by = 1)
   out <- numeric()
@@ -232,7 +234,7 @@ iterateOutbreakInducible <- function(time_to_outbreak,parameters,state,frac_susc
   return(out)
 }
 
-
+# Setup iterate outbreak and pull out final result
 summaryIterate <- function(time_to_outbreak,frac_suscept_outbreak,parameters,state){
   out <- iterateOutbreak(time_to_outbreak = time_to_outbreak,
                          parameters = parameters,
@@ -241,7 +243,6 @@ summaryIterate <- function(time_to_outbreak,frac_suscept_outbreak,parameters,sta
                          n_iter=10)
   return(matrix(c(tail(out[,"D"],n=1)+tail(out[,"Id"],n=1),tail(out[,"SM"],n=1)),nrow=1))
 }
-
 summaryIterateNoLag <- function(time_to_outbreak,frac_suscept_outbreak,parameters,state){
   out <- iterateOutbreakNoLag(time_to_outbreak = time_to_outbreak,
                          parameters = parameters,
@@ -250,7 +251,6 @@ summaryIterateNoLag <- function(time_to_outbreak,frac_suscept_outbreak,parameter
                          n_iter=10)
   return(matrix(c(tail(out[,"D"],n=1)+tail(out[,"Id"],n=1),tail(out[,"SM"],n=1)),nrow=1))
 }
-
 summaryIterateInducible <- function(time_to_outbreak,frac_suscept_outbreak,parameters,state){
   out <- iterateOutbreakInducible(time_to_outbreak = time_to_outbreak,
                               parameters = parameters,
@@ -260,34 +260,40 @@ summaryIterateInducible <- function(time_to_outbreak,frac_suscept_outbreak,param
   return(matrix(c(tail(out[,"D"],n=1)+tail(out[,"Id"],n=1)+tail(out[,"Df"],n=1),tail(out[,"SM"],n=1)),nrow=1))
 }
 
+## *** Takes a while to run
 
-
+# initial conditions
 state <- getInitial(V=100)
+
+# parameter ranges to sweep over
 t_range <- c(10^seq(0,4,.01))
 f_range <- c(10^seq(-3,0,0.01))
-
 sim_grid_A <- data.frame(Var1=t_range,Var2=0.5)
 sim_grid_B <- data.frame(Var1=24,Var2=f_range)
 sim_grid <- rbind(sim_grid_A,sim_grid_B)
 
+# Solve w/ short lag
 sim_grid_short <- sim_grid
 parameters <- getParameters(v0=100,kappa=0.01,phi=1000)
 D_mat_short <- mapply(FUN=summaryIterate,sim_grid_short$Var1,sim_grid_short$Var2, MoreArgs = list(parameters=parameters, state=state))
 sim_grid_short$D <- D_mat_short[1,]
 sim_grid_short$SM <- D_mat_short[2,]
 
+# Solve w/ long lag
 sim_grid_long <- sim_grid
 parameters <- getParameters(v0=100,kappa=0.01,phi=10)
 D_mat_long <- mapply(FUN=summaryIterate,sim_grid_long$Var1,sim_grid_long$Var2, MoreArgs = list(parameters=parameters, state=state))
 sim_grid_long$D <- D_mat_long[1,]
 sim_grid_long$SM <- D_mat_long[2,]
 
+# Solve w/ no lag
 sim_grid_none <- sim_grid
 parameters <- getParameters(v0=100,kappa=0.01,phi=0)
 D_mat_none <- mapply(FUN=summaryIterateNoLag,sim_grid_none$Var1,sim_grid_none$Var2, MoreArgs = list(parameters=parameters, state=state))
 sim_grid_none$D <- D_mat_none[1,]
 sim_grid_none$SM <- D_mat_none[2,]
 
+# Solve w/ upregulation
 sim_grid_inducible <- sim_grid
 state <- getInitialInducible(V=100)
 parameters <- getParameters(v0=100,kappa=0.01,phi=10,zeta=1e-1)
@@ -295,7 +301,7 @@ D_mat_inducible <- mapply(FUN=summaryIterateInducible,sim_grid_inducible$Var1,si
 sim_grid_inducible$D <- D_mat_inducible[1,]
 sim_grid_inducible$SM <- D_mat_inducible[2,]
 
-
+# Solve w/ upregulation that decays quickly
 sim_grid_inducible_short <- sim_grid
 state <- getInitialInducible(V=100)
 parameters <- getParameters(v0=100,kappa=0.01,phi=10,zeta=1e1)
@@ -304,7 +310,7 @@ sim_grid_inducible_short$D <- D_mat_inducible_short[1,]
 sim_grid_inducible_short$SM <- D_mat_inducible_short[2,]
 
 
-
+# Save output
 setwd("~/immunelag/Fig4")
 save(sim_grid_short,
      sim_grid_long,
@@ -316,6 +322,7 @@ save(sim_grid_short,
 setwd("~/immunelag/Fig4")
 load("outbreak_iterated.RData")
 
+ # Plot sweep over infected frac
 
 sim_long <- sim_grid_long %>% subset(Var1==24)
 sim_short <- sim_grid_short %>% subset(Var1==24)
@@ -359,6 +366,7 @@ text(0.25,8.5e-1,"Rel. Fit. = 1",cex=0.6)
 abline(h=1,lty=2)
 dev.off()
 
+# Plot sweep over time interval between outbreaks
 
 sim_long <- sim_grid_long %>% subset(Var2==0.5)
 sim_short <- sim_grid_short %>% subset(Var2==0.5)
@@ -401,7 +409,7 @@ text(160,1.2e0,"Rel. Fit. = 1",cex=0.6)
 abline(h=1,lty=2)
 dev.off()
 
-########### Short Induction
+########### Plot output when upregulation decays quickly
 
 
 sim_long <- sim_grid_long %>% subset(Var1==24)

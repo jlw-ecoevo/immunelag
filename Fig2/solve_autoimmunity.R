@@ -1,22 +1,28 @@
+
+# JLW - 2020
+
+# Panel A for Figure 2
+
+# Load packages
 library(gplots)
 library(dplyr)
 library(ggplot2)
 library(reshape2)
 library(wesanderson)
 
-#########################
-# Autoimmunity Invasion #
-#########################
-
+# Parameter ranges to sweep over
 alpha_range <- seq(0.1,1,0.01)
 mu_range <- 10^seq(-10,0.5,0.05)
 alpha_mu_combos <- expand.grid(alpha_range,mu_range)
 names(alpha_mu_combos) <- c("alpha","mu")
 
+# Invasion Condition
 alpha_mu_combos$k <- 2*alpha_mu_combos$mu/alpha_mu_combos$alpha
+
+# Reshape into matrix for plotting
 k_mat <- reshape(alpha_mu_combos, idvar = "alpha", timevar = "mu", direction = "wide")
 
-
+#Make a nice contour plot
 setwd("~/immunelag/Fig2")
 pdf(paste0("InvasionAutoimmunity_contour.pdf"),width=8,height=5)
 par(mar=c(5.1, 5, 1, 0.2))

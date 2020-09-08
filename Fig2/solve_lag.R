@@ -1,11 +1,13 @@
 
+# JLW - 2020
+
+# Panel B for Figure 2 (numerical solutions for lag model)
+
+# Load packages
 library(deSolve)
 library(wesanderson)
 
-
-############## Phase Diagram 
-
-
+# System of differential equations
 autoimmunitySystem <- function(t, state, parameters) {
   with(as.list(c(state, parameters)),{
     # rate of change
@@ -31,7 +33,7 @@ autoimmunitySystem <- function(t, state, parameters) {
 }
 
 
-
+# Given a pair of parameters phi and v0, returns state of system at 1e7 hours (presumed equilibrium)
 phi.vs.v0 <- function(phi,v0,state,parameters){
   parameters["v0"] <- v0
   parameters["phi"] <- phi
@@ -45,6 +47,7 @@ phi.vs.v0 <- function(phi,v0,state,parameters){
               SM = (tail(out[,"SM"],n=1) > 1e8)))
 }
 
+# Runs analysis over several SM costs
 sweepKappa <- function(k){
   parameters <- c(w=0.3,
                   r0=350,
@@ -82,8 +85,7 @@ sweepKappa <- function(k){
   return(i_mat[,-1])
 }
 
-
-
+# Numeric solutions for model varying kappa, phi, and v0 (takes a long time to run)
 kappas <- c(0.001,0.01,0.1)
 x <- lapply(kappas,sweepKappa)
 setwd("~/immunelag/Fig2")
@@ -92,9 +94,9 @@ save(x,file="kappa_sweep.RData")
 setwd("~/immunelag/Fig2")
 load("kappa_sweep.RData")
 
+# Plot is all in a nice contour plot
 phi_range <- (10^seq(-5,3.5,0.1))
 v0_range <- 10^seq(0,12,.1)
-
 setwd("~/immunelag/Fig2")
 pdf(paste0("InvasionLag_contour.pdf"),width=8,height=5)
 par(mar=c(5.1, 5, 1, 0.2))
