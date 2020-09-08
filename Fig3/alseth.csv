@@ -1,0 +1,145 @@
+Treatment,Phage titre,Block (based on day experiment was carried out),CRISPR (BIM2) fitness
+Monoculture (BIM2 + SM only),0,1st,1.472180655
+Monoculture (BIM2 + SM only),0,1st,0.69394619
+Monoculture (BIM2 + SM only),0,1st,1.009474848
+Monoculture (BIM2 + SM only),0,1st,0.978271365
+Monoculture (BIM2 + SM only),0,1st,0.823097286
+Monoculture (BIM2 + SM only),0,1st,0.891425558
+Monoculture (BIM2 + SM only),10^4,1st,1.36476084
+Monoculture (BIM2 + SM only),10^4,1st,0.829350324
+Monoculture (BIM2 + SM only),10^4,1st,1.154062685
+Monoculture (BIM2 + SM only),10^4,1st,1.162728988
+Monoculture (BIM2 + SM only),10^4,1st,0.987321815
+Monoculture (BIM2 + SM only),10^4,1st,0.962234129
+Monoculture (BIM2 + SM only),10^6,1st,0.904204342
+Monoculture (BIM2 + SM only),10^6,1st,0.947503451
+Monoculture (BIM2 + SM only),10^6,1st,0.845586283
+Monoculture (BIM2 + SM only),10^6,1st,0.889866342
+Monoculture (BIM2 + SM only),10^6,1st,0.991579074
+Monoculture (BIM2 + SM only),10^6,1st,0.692376176
+Monoculture (BIM2 + SM only),10^8,1st,0.616740135
+Monoculture (BIM2 + SM only),10^8,1st,0.654272909
+Monoculture (BIM2 + SM only),10^8,1st,0.603522898
+Monoculture (BIM2 + SM only),10^8,1st,0.722176249
+Monoculture (BIM2 + SM only),10^8,1st,0.598730317
+Monoculture (BIM2 + SM only),10^8,1st,0.697871225
+Polyculture,0,1st,0.567934518
+Polyculture,0,1st,1.147579027
+Polyculture,0,1st,3.395897121
+Polyculture,0,1st,0.971716267
+Polyculture,0,1st,0.78383746
+Polyculture,0,1st,2.396044122
+Polyculture,10^4,1st,0.312340399
+Polyculture,10^4,1st,0.868829547
+Polyculture,10^4,1st,0.903967458
+Polyculture,10^4,1st,1.001854706
+Polyculture,10^4,1st,1.133323387
+Polyculture,10^4,1st,1.471524192
+Polyculture,10^6,1st,1.117633356
+Polyculture,10^6,1st,1.181835117
+Polyculture,10^6,1st,1.561742886
+Polyculture,10^6,1st,1.236574952
+Polyculture,10^6,1st,1.408052004
+Polyculture,10^6,1st,1.227853028
+Polyculture,10^8,1st,1.023583904
+Polyculture,10^8,1st,0.840950768
+Polyculture,10^8,1st,0.856958364
+Polyculture,10^8,1st,0.819699305
+Polyculture,10^8,1st,1.017793304
+Polyculture,10^8,1st,1.170191422
+Monoculture (BIM2 + SM),0,2nd,0.910796515
+Monoculture (BIM2 + SM),0,2nd,0.861669648
+Monoculture (BIM2 + SM),0,2nd,0.715314813
+Monoculture (BIM2 + SM),0,2nd,0.759696908
+Monoculture (BIM2 + SM),0,2nd,1.27773071
+Monoculture (BIM2 + SM),0,2nd,0.923885531
+Monoculture (BIM2 + SM),10^4,2nd,1.006329516
+Monoculture (BIM2 + SM),10^4,2nd,1.079798608
+Monoculture (BIM2 + SM),10^4,2nd,0.716565196
+Monoculture (BIM2 + SM),10^4,2nd,0.818519438
+Monoculture (BIM2 + SM),10^4,2nd,0.9000436
+Monoculture (BIM2 + SM),10^4,2nd,1.153101263
+Monoculture (BIM2 + SM),10^6,2nd,0.809848956
+Monoculture (BIM2 + SM),10^6,2nd,0.646915059
+Monoculture (BIM2 + SM),10^6,2nd,0.86769531
+Monoculture (BIM2 + SM),10^6,2nd,0.790566838
+Monoculture (BIM2 + SM),10^6,2nd,0.995752124
+Monoculture (BIM2 + SM),10^6,2nd,0.749172199
+Monoculture (BIM2 + SM),10^8,2nd,0.687371799
+Monoculture (BIM2 + SM),10^8,2nd,0.556124501
+Monoculture (BIM2 + SM),10^8,2nd,0.61934163
+Monoculture (BIM2 + SM),10^8,2nd,0.680446996
+Monoculture (BIM2 + SM),10^8,2nd,0.460224137
+Monoculture (BIM2 + SM),10^8,2nd,0.592121707
+Polyculture,0,2nd,1.107186215
+Polyculture,0,2nd,1.336678819
+Polyculture,0,2nd,1.308119144
+Polyculture,0,2nd,1.137345623
+Polyculture,0,2nd,1.342652896
+Polyculture,0,2nd,1.597172082
+Polyculture,10^4,2nd,1.066434775
+Polyculture,10^4,2nd,0.735803748
+Polyculture,10^4,2nd,1.611548842
+Polyculture,10^4,2nd,1.24218935
+Polyculture,10^4,2nd,1.221438965
+Polyculture,10^4,2nd,1.241450339
+Polyculture,10^6,2nd,1.104024774
+Polyculture,10^6,2nd,1.27595228
+Polyculture,10^6,2nd,1.334924864
+Polyculture,10^6,2nd,1.595887378
+Polyculture,10^6,2nd,0.901665002
+Polyculture,10^6,2nd,1.672825859
+Polyculture,10^8,2nd,1.209464073
+Polyculture,10^8,2nd,1.312821131
+Polyculture,10^8,2nd,1.330218516
+Polyculture,10^8,2nd,1.017324226
+Polyculture,10^8,2nd,1.256672781
+Polyculture,10^8,2nd,1.088634713
+Monoculture (BIM2 + SM only),0,3rd,1.381109056
+Monoculture (BIM2 + SM only),0,3rd,1.667730731
+Monoculture (BIM2 + SM only),0,3rd,0.296820854
+Monoculture (BIM2 + SM only),0,3rd,0.964667776
+Monoculture (BIM2 + SM only),0,3rd,1.923009862
+Monoculture (BIM2 + SM only),0,3rd,1.749862477
+Monoculture (BIM2 + SM only),0,3rd,1.861241356
+Monoculture (BIM2 + SM only),0,3rd,2.173041095
+Monoculture (BIM2 + SM only),0,3rd,1.286223701
+Monoculture (BIM2 + SM only),0,3rd,1.236753559
+Monoculture (BIM2 + SM only),0,3rd,0.531266311
+Monoculture (BIM2 + SM only),0,3rd,0.964667776
+Monoculture (BIM2 + SM only),0,3rd,1.20583472
+Monoculture (BIM2 + SM only),0,3rd,1.59246744
+Monoculture (BIM2 + SM only),0,3rd,1.662196783
+Monoculture (BIM2 + SM only),0,3rd,1.827791576
+Monoculture (BIM2 + SM only),0,3rd,1.899189684
+Monoculture (BIM2 + SM only),0,3rd,1.142077942
+Monoculture (BIM2 + SM only),0,3rd,1.086144459
+Monoculture (BIM2 + SM only),0,3rd,1.873412782
+Monoculture (BIM2 + SM only),0,3rd,1.427179723
+Monoculture (BIM2 + SM only),0,3rd,1.721694058
+Monoculture (BIM2 + SM only),0,3rd,1.515906505
+Monoculture (BIM2 + SM only),0,3rd,1.067292007
+Polyculture,0,3rd,1.598969875
+Polyculture,0,3rd,3.098067665
+Polyculture,0,3rd,1.929335552
+Polyculture,0,3rd,1.858921846
+Polyculture,0,3rd,0.907922613
+Polyculture,0,3rd,1.41170894
+Polyculture,0,3rd,1.586342565
+Polyculture,0,3rd,2.380212882
+Polyculture,0,3rd,3.332488681
+Polyculture,0,3rd,1.643508063
+Polyculture,0,3rd,1.313342876
+Polyculture,0,3rd,1.378096823
+Polyculture,0,3rd,1.523159646
+Polyculture,0,3rd,1.216320239
+Polyculture,0,3rd,2.327136697
+Polyculture,0,3rd,2.894003328
+Polyculture,0,3rd,1.674770444
+Polyculture,0,3rd,1.361883919
+Polyculture,0,3rd,1.265138067
+Polyculture,0,3rd,2.875452025
+Polyculture,0,3rd,1.815845225
+Polyculture,0,3rd,1.342146471
+Polyculture,0,3rd,2.03652086
+Polyculture,0,3rd,2.599525796
