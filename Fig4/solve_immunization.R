@@ -169,6 +169,16 @@ par(mfrow=c(1,3))
 dev.off()
 
 
+# Plot
+setwd("~/immunelag/Fig4")
+pdf(paste0("ImmunizationLag_slides.pdf"),width=4,height=8)
+par(mfrow=c(2,1))
+plotOut(out_immunization_nolag,main=expression("Outbreak, No Lag"))
+plotOut(out_immunization_longlag,main=expression("Outbreak, Lag"))
+par(mfrow=c(1,1))
+dev.off()
+
+
 # Very costly surface mutant (kappa = 0.1, otherwise same as above)
 
 parameters <- getParameters(v0=100,kappa=0.1,phi=10)

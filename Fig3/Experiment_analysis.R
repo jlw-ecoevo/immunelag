@@ -131,7 +131,7 @@ mean_exp <- cur_exp %>% group_by(Titre) %>%
             LowerCI=bootMeanCI(Fitness,n=1e5)[1],
             UpperCI=bootMeanCI(Fitness,n=1e5)[2])
 p1 <- ggplot() + 
-  geom_line(data=model_df,aes(x=v_range,y=fitness),color="#d95f02",lwd=1) +
+  geom_line(data=model_df,aes(x=v_range,y=fitness),color="red",lwd=1) +
   geom_point(data = mean_exp,
              aes(x=Titre,y=MeanFitness))  +
   geom_errorbar(data = mean_exp,
@@ -148,8 +148,8 @@ p1 <- ggplot() +
   geom_text(data=data.frame(x=c(1e7),y=c(1.32)),aes(x=x,y=y),alpha=0.5,label="**",size=5) +
   geom_text(data=data.frame(x=c(1e8),y=c(1.22)),aes(x=x,y=y),alpha=0.5,label="***",size=5) + 
   geom_text(data=data.frame(x=c(1e9),y=c(1.12)),aes(x=x,y=y),alpha=0.5,label="****",size=5) + 
-  scale_y_continuous(breaks=c(0,0.25,0.5,0.75,1)) + 
-  geom_text(data=data.frame(x=c(3e10),y=c(0.75)),aes(x=x,y=y),color="#d95f02",label=expression(phi * "=" *1000),size=7)
+  scale_y_continuous(breaks=c(0,0.25,0.5,0.75,1))# + 
+  #geom_text(data=data.frame(x=c(3e10),y=c(0.75)),aes(x=x,y=y),color="#d95f02",label=expression(phi * "=" *1000),size=7)
 
 # Run model for comparison to Alseth et al. experiments (long lag)
 v_range_EA <- 10^seq(0,10,0.1)
@@ -227,4 +227,61 @@ ggarrange(p1,
           ggarrange(p2,p3,ncol=2,labels=c("(b)","(c)")),
           nrow=2,
           labels=c("(a)",""))
+dev.off()
+
+
+
+# Put it together
+setwd("~/immunelag/Fig3")
+pdf(paste0("CRISPRxSM_ourexperiments.pdf"),width=5,height=6)
+p1
+dev.off()
+
+# Put it together
+setwd("~/immunelag/Fig3")
+pdf(paste0("CRISPRxSM_otherexperiments.pdf"),width=6,height=5)
+ggarrange(p2,p3,ncol=2,labels=c("(a)","(b)"))
+dev.off()
+
+
+
+
+p_slidesA <- ggplot() + 
+  geom_point(data = mean_exp,
+             aes(x=Titre,y=MeanFitness))  +
+  geom_errorbar(data = mean_exp,
+                aes(x=Titre,y=MeanFitness,ymin = LowerCI, ymax = UpperCI),width=0.1) + 
+  scale_x_log10(limits=c(5e3,1e11)) + 
+  ylim(0.1,1.4) +
+  theme_pubclean() + 
+  geom_jitter(data=cur_exp,aes(x=Titre,y=Fitness),alpha=0.25,width=0.1) +
+  xlab("Phage Titre (PFU/mL)") + 
+  ylab("Relative Fitness CRISPR x SM") + 
+  geom_line(data=data.frame(x=c(1e8,1e10),y=c(1.1,1.1)),aes(x=x,y=y),alpha=0.5) +  
+  geom_line(data=data.frame(x=c(1e6,1e10),y=c(1.2,1.2)),aes(x=x,y=y),alpha=0.5) + 
+  geom_line(data=data.frame(x=c(1e4,1e10),y=c(1.3,1.3)),aes(x=x,y=y),alpha=0.5)  +
+  geom_text(data=data.frame(x=c(1e7),y=c(1.32)),aes(x=x,y=y),alpha=0.5,label="**",size=5) +
+  geom_text(data=data.frame(x=c(1e8),y=c(1.22)),aes(x=x,y=y),alpha=0.5,label="***",size=5) + 
+  geom_text(data=data.frame(x=c(1e9),y=c(1.12)),aes(x=x,y=y),alpha=0.5,label="****",size=5) + 
+  scale_y_continuous(breaks=c(0,0.25,0.5,0.75,1))
+
+p_slidesB <- ggplot() + 
+  geom_point(data = data.frame(x = c(1e7,1e8,3e8), 
+                               y = c(1.95,0.28,0.014),
+                               CI = c(0.62,0.03,0.011)),
+             aes(x=x,y=y))  +
+  geom_errorbar(data = data.frame(x = c(1e7,1e8,3e8), 
+                                  y = c(1.95,0.28,0.014),
+                                  CI = c(0.62,0.03,0.011)),
+                aes(x=x,y=y,ymin = y - CI, ymax = y + CI),width=0.1) + 
+  scale_x_log10(limits=c(5e3,1e11)) + 
+  theme_pubclean() + 
+  xlab("Phage Titre (PFU/mL)") + 
+  ylab("Relative Fitness CRISPR x SM")   + 
+  scale_y_continuous(breaks=c(0,0.5,1,1.5,2,2.5),limit=c(0,2.75))+
+  ggtitle("Westra et al. 2015 (Fig S3F)") 
+
+setwd("~/immunelag/Fig3")
+pdf(paste0("CRISPRxSM_slides.pdf"),width=5,height=4)
+p_slidesA
 dev.off()
