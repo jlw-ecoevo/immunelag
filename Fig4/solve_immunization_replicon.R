@@ -18,17 +18,19 @@ autoimmunitySystem <- function(t, state, parameters) {
     D <- max(D,0)
     SM <- max(SM,0)
     I <- max(I,0)
+    Iv <- max(Iv,0)
     Id <- max(Id,0)
     dR <- w*(r0-R) - e*v*R*(U+D+SM)/(z+R)
-    dU <- (v*R/(z+R) - delta*V - w)*U
-    dI <- (1-mu)*delta*U*V - gam*I - w*I
-    dD <- (v*R/(z+R) - w - delta*V)*D + mu*delta*V*U + phi*Id
+    dU <- ((1-2*mu/alpha)*v*R/(z+R) - delta*V - w)*U
+    dI <- delta*U*V - gam*I - w*I - mu*Iv
+    dIv <- delta*U*V + gam*log(beta)*Iv - (gam*exp(xi*log(beta))/xi)*I - mu*(Iv^2)/(I+1e-16)
+    dD <- ((1-2*mu/alpha)*v*R/(z+R) - w - delta*V)*D + mu*Iv + phi*Id
     dId <-  delta*D*V - phi*Id - w*Id
     dSM <- ((1-kappa)*v*R/(z+R) - w)*SM
     dV <- w*(v0-V) + beta*gam*I - delta*(U+D)*V
     
     # return the rate of change
-    list(c(dR,dU,dI,dD,dId,dSM,dV))
+    list(c(dR,dU,dI,dIv,dD,dId,dSM,dV))
   }) # end with(as.list ...
 }
 
@@ -41,17 +43,19 @@ autoimmunitySystemNoLag <- function(t, state, parameters) {
     D <- max(D,0)
     SM <- max(SM,0)
     I <- max(I,0)
+    Iv <- max(Iv,0)
     Id <- max(Id,0)
     dR <- w*(r0-R) - e*v*R*(U+D+SM)/(z+R)
-    dU <- (v*R/(z+R) - delta*V - w)*U
-    dI <- (1-mu)*delta*U*V - gam*I - w*I
-    dD <- (v*R/(z+R) - w)*D + mu*delta*V*U
+    dU <- ((1-2*mu/alpha)*v*R/(z+R) - delta*V - w)*U
+    dI <- delta*U*V - gam*I - w*I - mu*Iv
+    dIv <- delta*U*V + gam*log(beta)*Iv - (gam*exp(xi*log(beta))/xi)*I - mu*(Iv^2)/(I+1e-16)
+    dD <- ((1-2*mu/alpha)*v*R/(z+R) - w)*D + mu*Iv 
     dId <-  0
     dSM <- ((1-kappa)*v*R/(z+R) - w)*SM
     dV <- w*(v0-V) + beta*gam*I - delta*(U+D)*V
     
     # return the rate of change
-    list(c(dR,dU,dI,dD,dId,dSM,dV))
+    list(c(dR,dU,dI,dIv,dD,dId,dSM,dV))
   }) # end with(as.list ...
 }
 
@@ -61,8 +65,9 @@ getParameters <- function(w=0.3,
                 e=5e-7,
                 v=2,
                 z=1,
-                mu=1e-7,
                 delta=1e-7,
+                mu=1e-6,
+                alpha=0.4,
                 gam=4/3,
                 beta=80,
                 v0=0,
@@ -76,6 +81,7 @@ getParameters <- function(w=0.3,
                   z=z,
                   delta=delta,
                   mu=mu,
+                  alpha=alpha,
                   gam=gam,
                   beta=beta,
                   v0=v0,
@@ -89,6 +95,7 @@ getParameters <- function(w=0.3,
 getInitial <- function(R=350,
                        U=1e8,
                        I=0,
+                       Iv=0,
                        D=100,
                        Id=0,
                        SM=100,
@@ -96,6 +103,7 @@ getInitial <- function(R=350,
   state <- c(R=R,
              U=U,
              I=I,
+             Iv=Iv,
              D=D,
              Id=Id,
              SM=SM,

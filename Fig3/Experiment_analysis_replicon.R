@@ -23,7 +23,7 @@ lagSystem <- function(t, state, parameters) {
   with(as.list(c(state, parameters)),{
     # rate of change
     dR <- - e*v*R*(X+Y)/(z+R)
-    dX <- (v*R/(z+R) - delta*V)*X + phi*Ix
+    dX <- ((1-2*mu/alpha)*v*R/(z+R) - delta*V)*X + phi*Ix
     dY <- ((1-k)*v*R/(z+R))*Y
     dIx <- delta*X*V - phi*Ix
     dV <- -delta*X*V
@@ -38,6 +38,8 @@ competeXY <- function(V0,phi,dpi=1,re_add_phage=T,daylen=24,kappa=0){
                   v=2,
                   z=1,
                   delta=1e-7,
+                  mu=4e-6,
+                  alpha=0.4,
                   k=kappa,
                   delta=1e-7,
                   phi=phi)

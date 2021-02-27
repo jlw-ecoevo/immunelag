@@ -2,8 +2,9 @@ library(deSolve)
 library(wesanderson)
 
 setwd("~/immunelag/Fig2")
-source("get_R.R")
+source("get_R.R") #OK - R eqn doesnt inlude beta and v0 is unfixed
 source("test_eq.R")
+setwd("~/immunelag/DefectivePhage")
 
 getJacobian <- function(state,parameters){
   with(as.list(c(state, parameters)),{
@@ -31,7 +32,7 @@ getJacobian <- function(state,parameters){
 getEqBoth <- function(parameters){
   with(as.list(c(parameters)),{
     Req <- z*w/(v-k*v-w)
-    Veq <- (v*Req/(z+Req) - w)*((w+phi)/(delta*w))
+    Veq <- (-v*Req/(z+Req) + w)*((w+phi)/(-delta*w))
     Ceq <- w*(v0-Veq)/(Veq*delta)
     Leq <- delta*Veq*Ceq/(phi+w)
     Meq <- w*(r0-Req)*(z+Req)/(e*v*Req) - Ceq
@@ -111,7 +112,7 @@ getStability <- function(eq,J){
   }
 }
 
-eqStability <- function(v0,phi,eq_type = "Both") {
+eqStability <- function(v0,phi,frac_defective=0.1,eq_type = "Both") {
   
   parameters <- c(w=0.3,
                   r0=350,
@@ -119,9 +120,10 @@ eqStability <- function(v0,phi,eq_type = "Both") {
                   v=2,
                   z=1,
                   delta=1e-7,
+                  mu=1e-7,
                   gam=4/3,
-                  beta=80,
-                  v0=v0,
+                  beta=80*(1-frac_defective),
+                  v0=v0*(1-frac_defective),
                   phi=phi,
                   k=0.01)
   
@@ -137,36 +139,26 @@ eqStability <- function(v0,phi,eq_type = "Both") {
   }else {
     stop("Please pick one of three EQ types (Both, M, C)")
   }
-  # print(eq)
+  
   if(eq_type != "C"){
     eq <- Re(eq)
-    if(sum(abs(eq-testEq(eq,parameters)))>1){
-      J <- getJacobian(eq,parameters)
-      if(getStability(eq,J)!=3){
-        warning("Computed equilibrium seems to be incorrect? (different from numerical system solved at large t starting at eq)")
-      }
+    if(sum(abs(eq-testEq(eq,parameters)))>1e-3){
+      warning("Computed equilibrium seems to be incorrect? (different from numerical system solved at large t starting at eq)")
+      # print(sum(abs(eq-testEq(eq,parameters))))
     }
     J <- getJacobian(eq,parameters)
     return(getStability(eq,J))
     
   } else {
-    if(sum(abs(eq[[1]]-testEq(eq[[1]],parameters)))>1){
-      J <- getJacobian(eq[[1]],parameters)
-      if(getStability(eq[[1]],J)!=3){
-        warning("Computed equilibrium seems to be incorrect? (different from numerical system solved at large t starting at eq)")
-      }
-    } else if(sum(abs(eq[[2]]-testEq(eq[[2]],parameters)))>1){
-      J <- getJacobian(eq[[2]],parameters)
-      if(getStability(eq[[2]],J)!=3){
-        warning("Computed equilibrium seems to be incorrect? (different from numerical system solved at large t starting at eq)")
-      }
-    } else if(sum(abs(eq[[3]]-testEq(eq[[3]],parameters)))>1){
+    if(sum(abs(eq[[1]]-testEq(eq[[1]],parameters)))>1e-3){
+      warning("Computed equilibrium 1 seems to be incorrect? (different from numerical system solved at large t starting at eq)")
+      #print(sum(abs(eq[[1]]-testEq(eq[[1]],parameters))))
+    } else if(sum(abs(eq[[2]]-testEq(eq[[2]],parameters)))>1e-3){
+      warning("Computed equilibrium 2 seems to be incorrect? (different from numerical system solved at large t starting at eq)")
+      #print(sum(abs(eq[[2]]-testEq(eq[[2]],parameters))))
+    } else if(sum(abs(eq[[3]]-testEq(eq[[3]],parameters)))>1e-3){
       warning("Computed equilibrium 3 seems to be incorrect? (different from numerical system solved at large t starting at eq)")
-      J <- getJacobian(eq[[3]],parameters)
-      if(getStability(eq[[3]],J)!=3){
-        warning("Computed equilibrium seems to be incorrect? (different from numerical system solved at large t starting at eq)")
-      }
-      # print(sum(abs(eq[[3]]-testEq(eq[[3]],parameters))))
+      #print(sum(abs(eq[[3]]-testEq(eq[[3]],parameters))))
     }
     eq <- lapply(eq,Re)
     J <- lapply(eq,getJacobian,parameters=parameters)
@@ -238,7 +230,7 @@ x <- log(x)
 y <- v0_range
 ytick <- 10^(seq(0,12,3))
 y <- log(y)
-pdf(paste0("ModelEquilibria_contour.pdf"),width=8,height=5)
+pdf(paste0("ModelEquilibria_contour_fracdefective.pdf"),width=8,height=5)
 par(mar=c(5.1, 5, 1, 0.2))
 filled.contour(x=x,
                y=y,
@@ -262,7 +254,7 @@ filled.contour(x=x,
                  text(x=2,y=7,labels="CRISPR Only",cex=1.25)
                  text(x=2,y=19,labels="SM Only",cex=1.25)
                  text(x=2,y=13,labels="CRISPR or SM",cex=1.25)
-                 text(x=-3,y=23.6,labels=expression(v[0] * "=" * 10^9),cex=0.8)
+                 #text(x=-3,y=23.6,labels=expression(v[0] * "=" * 10^9),cex=0.8)
                  abline(h=log(1e9),lty=2,lwd=2)})
 par(mar=c(5.1, 4.1, 4.1, 2.1))
 dev.off()

@@ -2,8 +2,8 @@ library(deSolve)
 library(wesanderson)
 
 setwd("~/immunelag/Fig2")
-source("get_R.R")
-source("test_eq.R")
+source("get_R_replicon.R")
+source("test_eq_replicon.R")
 
 getJacobian <- function(state,parameters){
   with(as.list(c(state, parameters)),{
@@ -14,9 +14,9 @@ getJacobian <- function(state,parameters){
     J[1,5] <- -e*v*R/(z+R)
     J[2,2] <- -w - delta*C
     J[2,3] <- -delta*V
-    J[3,1] <- C*v*z/((z+R)^2)
+    J[3,1] <- C*((alpha-2*mu)/alpha)*v*z/((z+R)^2)
     J[3,2] <- -delta*C
-    J[3,3] <- v*R/(z+R) - w - delta*V
+    J[3,3] <- ((alpha-2*mu)/alpha)*v*R/(z+R) - w - delta*V
     J[3,4] <- phi
     J[4,2] <- delta*C
     J[4,3] <- delta*V
@@ -31,7 +31,7 @@ getJacobian <- function(state,parameters){
 getEqBoth <- function(parameters){
   with(as.list(c(parameters)),{
     Req <- z*w/(v-k*v-w)
-    Veq <- (v*Req/(z+Req) - w)*((w+phi)/(delta*w))
+    Veq <- (((2*mu-alpha)/alpha)*v*Req/(z+Req) + w)*((w+phi)/(-delta*w))
     Ceq <- w*(v0-Veq)/(Veq*delta)
     Leq <- delta*Veq*Ceq/(phi+w)
     Meq <- w*(r0-Req)*(z+Req)/(e*v*Req) - Ceq
@@ -119,6 +119,8 @@ eqStability <- function(v0,phi,eq_type = "Both") {
                   v=2,
                   z=1,
                   delta=1e-7,
+                  mu=1e-6,
+                  alpha=0.4,
                   gam=4/3,
                   beta=80,
                   v0=v0,
@@ -137,36 +139,26 @@ eqStability <- function(v0,phi,eq_type = "Both") {
   }else {
     stop("Please pick one of three EQ types (Both, M, C)")
   }
-  # print(eq)
+  
   if(eq_type != "C"){
     eq <- Re(eq)
-    if(sum(abs(eq-testEq(eq,parameters)))>1){
-      J <- getJacobian(eq,parameters)
-      if(getStability(eq,J)!=3){
-        warning("Computed equilibrium seems to be incorrect? (different from numerical system solved at large t starting at eq)")
-      }
+    if(sum(abs(eq-testEq(eq,parameters)))>1e-3){
+      warning("Computed equilibrium seems to be incorrect? (different from numerical system solved at large t starting at eq)")
+      # print(sum(abs(eq-testEq(eq,parameters))))
     }
     J <- getJacobian(eq,parameters)
     return(getStability(eq,J))
     
   } else {
-    if(sum(abs(eq[[1]]-testEq(eq[[1]],parameters)))>1){
-      J <- getJacobian(eq[[1]],parameters)
-      if(getStability(eq[[1]],J)!=3){
-        warning("Computed equilibrium seems to be incorrect? (different from numerical system solved at large t starting at eq)")
-      }
-    } else if(sum(abs(eq[[2]]-testEq(eq[[2]],parameters)))>1){
-      J <- getJacobian(eq[[2]],parameters)
-      if(getStability(eq[[2]],J)!=3){
-        warning("Computed equilibrium seems to be incorrect? (different from numerical system solved at large t starting at eq)")
-      }
-    } else if(sum(abs(eq[[3]]-testEq(eq[[3]],parameters)))>1){
+    if(sum(abs(eq[[1]]-testEq(eq[[1]],parameters)))>1e-3){
+      warning("Computed equilibrium 1 seems to be incorrect? (different from numerical system solved at large t starting at eq)")
+      #print(sum(abs(eq[[1]]-testEq(eq[[1]],parameters))))
+    } else if(sum(abs(eq[[2]]-testEq(eq[[2]],parameters)))>1e-3){
+      warning("Computed equilibrium 2 seems to be incorrect? (different from numerical system solved at large t starting at eq)")
+      #print(sum(abs(eq[[2]]-testEq(eq[[2]],parameters))))
+    } else if(sum(abs(eq[[3]]-testEq(eq[[3]],parameters)))>1e-3){
       warning("Computed equilibrium 3 seems to be incorrect? (different from numerical system solved at large t starting at eq)")
-      J <- getJacobian(eq[[3]],parameters)
-      if(getStability(eq[[3]],J)!=3){
-        warning("Computed equilibrium seems to be incorrect? (different from numerical system solved at large t starting at eq)")
-      }
-      # print(sum(abs(eq[[3]]-testEq(eq[[3]],parameters))))
+      #print(sum(abs(eq[[3]]-testEq(eq[[3]],parameters))))
     }
     eq <- lapply(eq,Re)
     J <- lapply(eq,getJacobian,parameters=parameters)

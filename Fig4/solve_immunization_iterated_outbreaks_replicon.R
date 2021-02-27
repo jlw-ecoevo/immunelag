@@ -19,17 +19,19 @@ autoimmunitySystem <- function(t, state, parameters) {
     D <- max(D,0)
     SM <- max(SM,0)
     I <- max(I,0)
+    Iv <- max(Iv,0)
     Id <- max(Id,0)
     dR <- w*(r0-R) - e*v*R*(U+D+SM)/(z+R)
-    dU <- (v*R/(z+R) - delta*V - w)*U
-    dI <- (1-mu)*delta*U*V - gam*I - w*I
-    dD <- (v*R/(z+R) - w - delta*V)*D + mu*delta*V*U + phi*Id
+    dU <- ((1-2*mu/alpha)*v*R/(z+R) - delta*V - w)*U
+    dI <- delta*U*V - gam*I - w*I - mu*Iv
+    dIv <- delta*U*V + gam*log(beta)*Iv - (gam*exp(xi*log(beta))/xi)*I - mu*(Iv^2)/(I+1e-16)
+    dD <- ((1-2*mu/alpha)*v*R/(z+R) - w - delta*V)*D + mu*Iv + phi*Id
     dId <-  delta*D*V - phi*Id - w*Id
     dSM <- ((1-kappa)*v*R/(z+R) - w)*SM
     dV <- w*(v0-V) + beta*gam*I - delta*(U+D)*V
     
     # return the rate of change
-    list(c(dR,dU,dI,dD,dId,dSM,dV))
+    list(c(dR,dU,dI,dIv,dD,dId,dSM,dV))
   }) # end with(as.list ...
 }
 
@@ -42,17 +44,19 @@ autoimmunitySystemNoLag <- function(t, state, parameters) {
     D <- max(D,0)
     SM <- max(SM,0)
     I <- max(I,0)
+    Iv <- max(Iv,0)
     Id <- max(Id,0)
     dR <- w*(r0-R) - e*v*R*(U+D+SM)/(z+R)
     dU <- ((1-2*mu/alpha)*v*R/(z+R) - delta*V - w)*U
-    dI <- (1-mu)*delta*U*V - gam*I - w*I 
-    dD <- ((1-2*mu/alpha)*v*R/(z+R) - w)*D + mu*delta*V*U 
+    dI <- delta*U*V - gam*I - w*I - mu*Iv
+    dIv <- delta*U*V + gam*log(beta)*Iv - (gam*exp(xi*log(beta))/xi)*I - mu*(Iv^2)/(I+1e-16)
+    dD <- ((1-2*mu/alpha)*v*R/(z+R) - w)*D + mu*Iv 
     dId <-  0
     dSM <- ((1-kappa)*v*R/(z+R) - w)*SM
     dV <- w*(v0-V) + beta*gam*I - delta*(U+D)*V
     
     # return the rate of change
-    list(c(dR,dU,dI,dD,dId,dSM,dV))
+    list(c(dR,dU,dI,dIv,dD,dId,dSM,dV))
   }) # end with(as.list ...
 }
 
@@ -66,18 +70,20 @@ autoimmunitySystemInducible <- function(t, state, parameters) {
     Df <- max(Df,0)
     SM <- max(SM,0)
     I <- max(I,0)
+    Iv <- max(Iv,0)
     Id <- max(Id,0)
     dR <- w*(r0-R) - e*v*R*(U+D+SM+Df)/(z+R)
-    dU <- (v*R/(z+R) - delta*V - w)*U
-    dI <- (1-mu)*delta*U*V - gam*I - w*I
-    dD <-  (v*R/(z+R) - w - delta*V)*D + zeta*Df*(Df/(Df+delta*V))
-    dDf <- (v*R/(z+R) - w)*Df + mu*delta*V*U + phi*Id - zeta*Df*(Df/(Df+delta*V))
+    dU <- ((1-2*mu/alpha)*v*R/(z+R) - delta*V - w)*U
+    dI <- delta*U*V - gam*I - w*I - mu*Iv
+    dIv <- delta*U*V + gam*log(beta)*Iv - (gam*exp(xi*log(beta))/xi)*I - mu*(Iv^2)/(I+1e-16)
+    dD <-  ((1-2*mu/alpha)*v*R/(z+R) - w - delta*V)*D + zeta*Df*(Df/(Df+delta*V))
+    dDf <- ((1-2*mu/alpha)*v*R/(z+R) - w)*Df + mu*Iv + phi*Id - zeta*Df*(Df/(Df+delta*V))
     dId <-  delta*D*V - phi*Id - w*Id
     dSM <- ((1-kappa)*v*R/(z+R) - w)*SM
     dV <- w*(v0-V) + beta*gam*I - delta*(U+D+Df)*V
     
     # return the rate of change
-    list(c(dR,dU,dI,dD,dDf,dId,dSM,dV))
+    list(c(dR,dU,dI,dIv,dD,dDf,dId,dSM,dV))
   }) # end with(as.list ...
 }
 
@@ -89,7 +95,7 @@ getParameters <- function(w=0.3,
                 v=2,
                 z=1,
                 delta=1e-7,
-                mu=1e-7,
+                mu=1e-6,
                 alpha=0.4,
                 gam=4/3,
                 beta=80,
@@ -120,6 +126,7 @@ getParameters <- function(w=0.3,
 getInitial <- function(R=350,
                        U=0,
                        I=0,
+                       Iv=0,
                        D=5e7,
                        Id=0,
                        SM=5e7,
@@ -127,6 +134,7 @@ getInitial <- function(R=350,
   state <- c(R=R,
              U=U,
              I=I,
+             Iv=Iv,
              D=D,
              Id=Id,
              SM=SM,
@@ -138,6 +146,7 @@ getInitial <- function(R=350,
 getInitialInducible <- function(R=350,
                        U=0,
                        I=0,
+                       Iv=0,
                        D=0,
                        Df=5e7,
                        Id=0,
@@ -146,6 +155,7 @@ getInitialInducible <- function(R=350,
   state <- c(R=R,
              U=U,
              I=I,
+             Iv=Iv,
              D=D,
              Df=Df,
              Id=Id,
@@ -168,8 +178,9 @@ iterateOutbreak <- function(time_to_outbreak,parameters,state,frac_suscept_outbr
     out_i[,"time"] <- out_i[,"time"]+((i-1)*time_to_outbreak)
     out <- rbind(out,out_i)
     state <- getInitial(R=tail(out_i[,"R"],n=1),
-                        U=(tail(out_i[,"D"],n=1)+tail(out_i[,"Id"],n=1)+tail(out_i[,"SM"],n=1))*frac_suscept_outbreak+tail(out_i[,"U"],n=1),
+                        U=(tail(out_i[,"D"],n=1)+tail(out_i[,"Id"],n=1)+tail(out_i[,"SM"],n=1))*frac_suscept_outbreak,
                         I=tail(out_i[,"I"],n=1),
+                        Iv=tail(out_i[,"Iv"],n=1),
                         D=(1-frac_suscept_outbreak)*tail(out_i[,"D"],n=1),
                         Id=(1-frac_suscept_outbreak)*tail(out_i[,"Id"],n=1),
                         SM=(1-frac_suscept_outbreak)*tail(out_i[,"SM"],n=1),
@@ -189,8 +200,9 @@ iterateOutbreakNoLag <- function(time_to_outbreak,parameters,state,frac_suscept_
     out_i[,"time"] <- out_i[,"time"]+((i-1)*time_to_outbreak)
     out <- rbind(out,out_i)
     state <- getInitial(R=tail(out_i[,"R"],n=1),
-                        U=(tail(out_i[,"D"],n=1)+tail(out_i[,"Id"],n=1)+tail(out_i[,"SM"],n=1))*frac_suscept_outbreak+tail(out_i[,"U"],n=1),
+                        U=(tail(out_i[,"D"],n=1)+tail(out_i[,"Id"],n=1)+tail(out_i[,"SM"],n=1))*frac_suscept_outbreak,
                         I=tail(out_i[,"I"],n=1),
+                        Iv=tail(out_i[,"Iv"],n=1),
                         D=(1-frac_suscept_outbreak)*tail(out_i[,"D"],n=1),
                         Id=(1-frac_suscept_outbreak)*tail(out_i[,"Id"],n=1),
                         SM=(1-frac_suscept_outbreak)*tail(out_i[,"SM"],n=1),
@@ -210,8 +222,9 @@ iterateOutbreakInducible <- function(time_to_outbreak,parameters,state,frac_susc
     out_i[,"time"] <- out_i[,"time"]+((i-1)*time_to_outbreak)
     out <- rbind(out,out_i)
     state <- getInitialInducible(R=tail(out_i[,"R"],n=1),
-                        U=(tail(out_i[,"D"],n=1)+tail(out_i[,"Id"],n=1)+tail(out_i[,"Df"],n=1)+tail(out_i[,"SM"],n=1))*frac_suscept_outbreak+tail(out_i[,"U"],n=1),
+                        U=(tail(out_i[,"D"],n=1)+tail(out_i[,"Id"],n=1)+tail(out_i[,"Df"],n=1)+tail(out_i[,"SM"],n=1))*frac_suscept_outbreak,
                         I=tail(out_i[,"I"],n=1),
+                        Iv=tail(out_i[,"Iv"],n=1),
                         D=(1-frac_suscept_outbreak)*tail(out_i[,"D"],n=1),
                         Df=(1-frac_suscept_outbreak)*tail(out_i[,"Df"],n=1),
                         Id=(1-frac_suscept_outbreak)*tail(out_i[,"Id"],n=1),
