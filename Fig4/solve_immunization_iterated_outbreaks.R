@@ -70,8 +70,8 @@ autoimmunitySystemInducible <- function(t, state, parameters) {
     dR <- w*(r0-R) - e*v*R*(U+D+SM+Df)/(z+R)
     dU <- (v*R/(z+R) - delta*V - w)*U
     dI <- (1-mu)*delta*U*V - gam*I - w*I
-    dD <-  (v*R/(z+R) - w - delta*V)*D + zeta*Df*(Df/(Df+delta*V))
-    dDf <- (v*R/(z+R) - w)*Df + mu*delta*V*U + phi*Id - zeta*Df*(Df/(Df+delta*V))
+    dD <-  (v*R/(z+R) - w - delta*V)*D + zeta*Df
+    dDf <- (v*R/(z+R) - w)*Df + mu*delta*V*U + phi*Id - zeta*Df
     dId <-  delta*D*V - phi*Id - w*Id
     dSM <- ((1-kappa)*v*R/(z+R) - w)*SM
     dV <- w*(v0-V) + beta*gam*I - delta*(U+D+Df)*V
@@ -435,7 +435,7 @@ lines(sim_long$Var2,rel_fit_long,lwd=3,col="#e41a1c")
 lines(sim_inducible$Var2,rel_fit_inducible,lwd=3,col="#984ea3")
 text(0.75,3e0,"No Lag",col="#4daf4a")
 text(0.13,1e-2,"Long Lag",col="#e41a1c")
-text(0.28,5e-2,"Upregulation",col="#984ea3")
+text(0.28,2e-1,"Upregulation",col="#984ea3")
 text(0.62,1e-1,"Short Lag",col="#377eb8")
 text(0.25,8.5e-1,"Rel. Fit. = 1",cex=0.6)
 abline(h=1,lty=2)

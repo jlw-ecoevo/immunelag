@@ -76,8 +76,8 @@ autoimmunitySystemInducible <- function(t, state, parameters) {
     dU <- ((1-2*mu/alpha)*v*R/(z+R) - delta*V - w)*U
     dI <- delta*U*V - gam*I - w*I - mu*Iv
     dIv <- delta*U*V + gam*log(beta)*Iv - (gam*exp(xi*log(beta))/xi)*I - mu*(Iv^2)/(I+1e-16)
-    dD <-  ((1-2*mu/alpha)*v*R/(z+R) - w - delta*V)*D + zeta*Df*(Df/(Df+delta*V))
-    dDf <- ((1-2*mu/alpha)*v*R/(z+R) - w)*Df + mu*Iv + phi*Id - zeta*Df*(Df/(Df+delta*V))
+    dD <-  ((1-2*mu/alpha)*v*R/(z+R) - w - delta*V)*D + zeta*Df
+    dDf <- ((1-2*mu/alpha)*v*R/(z+R) - w)*Df + mu*Iv + phi*Id - zeta*Df
     dId <-  delta*D*V - phi*Id - w*Id
     dSM <- ((1-kappa)*v*R/(z+R) - w)*SM
     dV <- w*(v0-V) + beta*gam*I - delta*(U+D+Df)*V
