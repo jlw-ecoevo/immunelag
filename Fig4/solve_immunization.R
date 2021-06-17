@@ -192,6 +192,7 @@ out_immunization_nolag_costlysm <- ode(y = state,
                               parms = parameters,
                               method="lsoda")
 
+
 setwd("~/immunelag/Fig4")
 pdf(paste0("ImmunizationLag_costly.pdf"),width=12,height=4)
 par(mfrow=c(1,3))
@@ -201,3 +202,30 @@ plotOut(out_immunization_longlag_costlysm,main=expression("Outbreak, Long Lag"))
 par(mfrow=c(1,3))
 dev.off()
 
+parameters <- getParameters(v0=100,kappa=0.5,phi=10)
+out_immunization_longlag_verycostlysm <- ode(y = state, 
+                                             times = times, 
+                                             func = autoimmunitySystem, 
+                                             parms = parameters,
+                                             method="lsoda")
+parameters <- getParameters(v0=100,kappa=0.5,phi=1e3)
+out_immunization_shortlag_verycostlysm <- ode(y = state, 
+                                              times = times, 
+                                              func = autoimmunitySystem, 
+                                              parms = parameters,
+                                              method="lsoda")
+parameters <- getParameters(v0=100,kappa=0.5,phi=0)
+out_immunization_nolag_verycostlysm <- ode(y = state, 
+                                           times = times, 
+                                           func = autoimmunitySystemNoLag, 
+                                           parms = parameters,
+                                           method="lsoda")
+
+setwd("~/immunelag/Fig4")
+pdf(paste0("ImmunizationLag_verycostly.pdf"),width=12,height=4)
+par(mfrow=c(1,3))
+plotOut(out_immunization_nolag_verycostlysm,main=expression("Outbreak, No Lag"))
+plotOut(out_immunization_shortlag_verycostlysm,main=expression("Outbreak, Short Lag"))
+plotOut(out_immunization_longlag_verycostlysm,main=expression("Outbreak, Long Lag"))
+par(mfrow=c(1,3))
+dev.off()
