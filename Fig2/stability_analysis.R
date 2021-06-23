@@ -111,7 +111,7 @@ getStability <- function(eq,J){
   }
 }
 
-eqStability <- function(v0,phi,eq_type = "Both") {
+eqStability <- function(v0,phi,eq_type = "Both",k=0.01) {
   
   parameters <- c(w=0.3,
                   r0=350,
@@ -123,7 +123,7 @@ eqStability <- function(v0,phi,eq_type = "Both") {
                   beta=80,
                   v0=v0,
                   phi=phi,
-                  k=0.01)
+                  k=k)
   
   if(eq_type == "Both"){
     eq <- getEqBoth(parameters)
@@ -195,18 +195,14 @@ eqStability(1e6,0.1,eq_type="C")
 phi_range <- (10^seq(-2,5,0.1))
 v0_range <- 10^seq(0,12,0.1)
 
-pv_combos <- expand.grid(phi_range,v0_range)
-names(pv_combos) <- c("phi","v0")
-x <- mapply(eqStability,phi=pv_combos$phi,v0=pv_combos$v0)
-table(x)
-pv_combos$B <- x
-B_mat <- reshape(pv_combos, idvar = "phi", timevar = "v0", direction = "wide")
-table(unlist(B_mat[,-1])) # Never stable
+# pv_combos <- expand.grid(phi_range,v0_range)
+# names(pv_combos) <- c("phi","v0")
+# x <- mapply(eqStability,phi=pv_combos$phi,v0=pv_combos$v0)
+# table(x)
+# pv_combos$B <- x
+# B_mat <- reshape(pv_combos, idvar = "phi", timevar = "v0", direction = "wide")
+# table(unlist(B_mat[,-1])) # Never stable
 
-
-
-phi_range <- (10^seq(-2,5,0.1))
-v0_range <- 10^seq(0,12,0.1)
 
 pv_combos <- expand.grid(phi_range,v0_range)
 names(pv_combos) <- c("phi","v0")
@@ -228,7 +224,6 @@ C_mat <- reshape(pv_combos, idvar = "phi", timevar = "v0", direction = "wide")
 eq_mat <- C_mat[,-1] == 1
 eq_mat[C_mat[,-1] == 1 & M_mat[,-1] == 1] <- 2
 eq_mat[C_mat[,-1] != 1 & M_mat[,-1] == 1] <- 3
-
 eq_mat_rev <- eq_mat[nrow(eq_mat):1,]
 
 
@@ -258,7 +253,20 @@ filled.contour(x=x,
                          lwd=1, 
                          drawlabels = F, axes = FALSE, 
                          frame.plot = FALSE, add = TRUE,
+                         labels = "Cost of SM = 0.01",
                          col="black")
+                 contour(x=log10(phi_range), 
+                         y=log10(v0_range),
+                         z=as.matrix(x[[1]]), 
+                         levels = 1, lwd=2, labels = "Cost of SM = 0.001",
+                         drawlabels = T, axes = FALSE, 
+                         frame.plot = FALSE, add = TRUE,labcex=1);
+                 contour(x=log10(phi_range),
+                         y=log10(v0_range),
+                         z=as.matrix(x[[3]]), 
+                         levels = 1, lwd=2, labels = "Cost of SM = 0.1",
+                         drawlabels = T, axes = FALSE, 
+                         frame.plot = FALSE, add = TRUE,labcex=1);
                  text(x=2,y=7,labels="CRISPR Only",cex=1.25)
                  text(x=2,y=19,labels="SM Only",cex=1.25)
                  text(x=2,y=13,labels="CRISPR or SM",cex=1.25)

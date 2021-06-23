@@ -18,7 +18,8 @@ getJacobian <- function(state,parameters){
     J[3,3] <- -phi - w
     J[3,4] <- delta*C
     J[4,1] <- -delta*V
-    J[4,4] <- -delta*C-w
+    J[4,2] <- -delta*V
+    J[4,4] <- -delta*C-delta*M-w
     #print(J)
     return(J)
   })
@@ -44,10 +45,10 @@ getEqC <- function(parameters){
 
 getEqM <- function(parameters){
   with(as.list(c(parameters)),{
-    Veq <- v0
     Ceq <- 0
     Leq <- 0
     Meq <- k*(1-w/((1-kappa)*r))
+    Veq <- w*v0/(delta*Meq+w)
     return(c(C = Ceq,
              M = Meq,
              L = Leq,
@@ -103,7 +104,7 @@ eqStability <- function(v0,phi,eq_type = "Both") {
 
 
 #Test
-eqStability(1,1)
+# eqStability(1,1)
 eqStability(1000,1,eq_type="M")
 eqStability(10,1,eq_type="C")
 
@@ -148,7 +149,7 @@ x <- log(x)
 y <- v0_range
 ytick <- 10^(seq(0,12,3))
 y <- log(y)
-pdf(paste0("ModelEquilibria_contour_minimal.pdf"),width=8,height=5)
+pdf(paste0("ModelEquilibria_contour_minimal_Madsorption.pdf"),width=8,height=5)
 par(mar=c(5.1, 5, 1, 0.2))
 filled.contour(x=x,
                y=y,

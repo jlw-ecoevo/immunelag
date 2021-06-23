@@ -17,8 +17,7 @@ getJacobian <- function(state,parameters){
     J[3,1] <- delta*V
     J[3,3] <- -phi - w
     J[3,4] <- delta*C
-    J[4,1] <- -delta*V
-    J[4,4] <- -delta*C-w
+    J[4,4] <- -w
     #print(J)
     return(J)
   })
@@ -27,27 +26,23 @@ getJacobian <- function(state,parameters){
 
 getEqC <- function(parameters){
   with(as.list(c(parameters)),{
-    Ceq <- getC(v0,phi)
-    Veq <- w*v0/(delta*Ceq+w)
+    Ceq <- (1-(w/r)*((delta*v0)/(phi+w) + 1))*k
+    Veq <- v0
     Leq <- delta*Veq*Ceq/(phi+w)
-    Meq <- c(0,0)
-    return(list(eq1 = c(C = Ceq[1],
-                        M = Meq[1],
-                        L = Leq[1],
-                        V = Veq[1]),
-                eq2 = c(C = Ceq[2],
-                        M = Meq[2],
-                        L = Leq[2],
-                        V = Veq[2])))
+    Meq <- 0
+    return(c(C = Ceq,
+             M = Meq,
+             L = Leq,
+             V = Veq))
   })
 }
 
 getEqM <- function(parameters){
   with(as.list(c(parameters)),{
-    Veq <- v0
     Ceq <- 0
     Leq <- 0
     Meq <- k*(1-w/((1-kappa)*r))
+    Veq <- v0
     return(c(C = Ceq,
              M = Meq,
              L = Leq,
@@ -88,22 +83,14 @@ eqStability <- function(v0,phi,eq_type = "Both") {
   }
   # print(eq)
  
-  if(eq_type != "C"){
-    eq <- Re(eq)
-    J <- getJacobian(eq,parameters)
-    return(getStability(eq,J))
-    
-  } else {
-    eq <- lapply(eq,Re)
-    J <- lapply(eq,getJacobian,parameters=parameters)
-    return(mapply(getStability,eq,J))
-  }
+  eq <- Re(eq)
+  J <- getJacobian(eq,parameters)
   return(getStability(eq,J))
 }
 
 
 #Test
-eqStability(1,1)
+# eqStability(1,1)
 eqStability(1000,1,eq_type="M")
 eqStability(10,1,eq_type="C")
 
@@ -129,15 +116,13 @@ M_mat <- reshape(pv_combos, idvar = "phi", timevar = "v0", direction = "wide")
 pv_combos <- expand.grid(phi_range,v0_range)
 names(pv_combos) <- c("phi","v0")
 x <- mapply(eqStability,phi=pv_combos$phi,v0=pv_combos$v0,MoreArgs = list(eq_type="C"))
-table(x[1,])
-table(x[2,])
-pv_combos$C <- x[2,]
+pv_combos$C <- x
 C_mat <- reshape(pv_combos, idvar = "phi", timevar = "v0", direction = "wide")
 
 
 eq_mat <- C_mat[,-1] == 1
-eq_mat[C_mat[,-1] == 1 & M_mat[,-1] == 1] <- 2
-eq_mat[C_mat[,-1] != 1 & M_mat[,-1] == 1] <- 3
+eq_mat[C_mat[,-1] == 1 & M_mat[,-1] == 1] <- 10
+eq_mat[C_mat[,-1] != 1 & M_mat[,-1] == 1] <- 2
 
 eq_mat_rev <- eq_mat[nrow(eq_mat):1,]
 
@@ -148,7 +133,7 @@ x <- log(x)
 y <- v0_range
 ytick <- 10^(seq(0,12,3))
 y <- log(y)
-pdf(paste0("ModelEquilibria_contour_minimal.pdf"),width=8,height=5)
+pdf(paste0("ModelEquilibria_contour_minimal_NOadsorption.pdf"),width=8,height=5)
 par(mar=c(5.1, 5, 1, 0.2))
 filled.contour(x=x,
                y=y,
@@ -156,7 +141,7 @@ filled.contour(x=x,
                xlab=expression("Lag Length (" * 1/phi * ")"),
                ylab=expression("Envrionmental Viral Pool (" * v[0] * ")"),
                levels=c(0,1.5,2.5,4),
-               col = wes_palette("Moonrise3",3),
+               col = wes_palette("Moonrise3",3)[c(1,3,2)],
                cex.lab=1.5,
                cex.axis=1.5,
                plot.axes = {axis(1, at=log(xtick), label=xtick);
@@ -171,7 +156,6 @@ filled.contour(x=x,
                          col="black")
                  text(x=2,y=7,labels="CRISPR Only",cex=1.25)
                  text(x=2,y=24,labels="SM Only",cex=1.25)
-                 text(x=2,y=15,labels="CRISPR or SM",cex=1.25)
                  text(x=-3,y=21.5,labels=expression(v[0] * "=" * 10^9),cex=0.8)
                  abline(h=log(1e9),lty=2,lwd=2)})
 par(mar=c(5.1, 4.1, 4.1, 2.1))

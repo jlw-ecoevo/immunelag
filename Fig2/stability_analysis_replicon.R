@@ -230,7 +230,7 @@ x <- log(x)
 y <- v0_range
 ytick <- 10^(seq(0,12,3))
 y <- log(y)
-pdf(paste0("ModelEquilibria_contour.pdf"),width=8,height=5)
+pdf(paste0("ModelEquilibria_contour_replicon.pdf"),width=8,height=5)
 par(mar=c(5.1, 5, 1, 0.2))
 filled.contour(x=x,
                y=y,
