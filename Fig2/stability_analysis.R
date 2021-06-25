@@ -100,13 +100,13 @@ getEqNeither <- function(parameters){
 
 reig <- function(x) {Re(eigen(x)$values)}
 getStability <- function(eq,J){
-  if(sum(reig(J)>=0)==0 & sum(eq<0)==0){#Stable eq
+  if(sum(reig(J)>=0)==0 & sum(Re(eq)<0)==0 & sum(abs(Im(eq)))<100){#Stable eq
     return(1)
-  } else if(sum(reig(J)>0)>0 & sum(eq<0)==0){#Unstable eq
+  } else if(sum(reig(J)>0)>0 & sum(Re(eq)<0)==0 & sum(abs(Im(eq)))<100){#Unstable eq
     return(-1)
-  } else if(sum(reig(J)==0)>0 & sum(reig(J)>0)==0 & sum(eq<0)==0){#Unclear
+  } else if(sum(reig(J)==0)>0 & sum(reig(J)>0)==0 & sum(Re(eq)<0)==0 & sum(abs(Im(eq)))<100){#Unclear
     return(2)
-  }  else if(sum(eq<0)>0){#Not a real eq
+  }  else if(sum(Re(eq)<0)>0 | sum(abs(Im(eq)))>100){#Not a real eq
     return(3)
   }
 }
@@ -139,37 +139,37 @@ eqStability <- function(v0,phi,eq_type = "Both",k=0.01) {
   }
   # print(eq)
   if(eq_type != "C"){
-    eq <- Re(eq)
-    if(sum(abs(eq-testEq(eq,parameters)))>1){
-      J <- getJacobian(eq,parameters)
-      if(getStability(eq,J)!=3){
-        warning("Computed equilibrium seems to be incorrect? (different from numerical system solved at large t starting at eq)")
-      }
-    }
-    J <- getJacobian(eq,parameters)
+    # eq <- Re(eq)
+    # if(sum(abs(Re(eq)-testEq(Re(eq),parameters)))>1){
+    #   J <- getJacobian(Re(eq),parameters)
+    #   if(getStability(eq,J)!=3){
+    #     warning("Computed equilibrium seems to be incorrect? (different from numerical system solved at large t starting at eq)")
+    #   }
+    # }
+    J <- getJacobian(Re(eq),parameters)
     return(getStability(eq,J))
     
   } else {
-    if(sum(abs(eq[[1]]-testEq(eq[[1]],parameters)))>1){
-      J <- getJacobian(eq[[1]],parameters)
-      if(getStability(eq[[1]],J)!=3){
-        warning("Computed equilibrium seems to be incorrect? (different from numerical system solved at large t starting at eq)")
-      }
-    } else if(sum(abs(eq[[2]]-testEq(eq[[2]],parameters)))>1){
-      J <- getJacobian(eq[[2]],parameters)
-      if(getStability(eq[[2]],J)!=3){
-        warning("Computed equilibrium seems to be incorrect? (different from numerical system solved at large t starting at eq)")
-      }
-    } else if(sum(abs(eq[[3]]-testEq(eq[[3]],parameters)))>1){
-      warning("Computed equilibrium 3 seems to be incorrect? (different from numerical system solved at large t starting at eq)")
-      J <- getJacobian(eq[[3]],parameters)
-      if(getStability(eq[[3]],J)!=3){
-        warning("Computed equilibrium seems to be incorrect? (different from numerical system solved at large t starting at eq)")
-      }
-      # print(sum(abs(eq[[3]]-testEq(eq[[3]],parameters))))
-    }
-    eq <- lapply(eq,Re)
-    J <- lapply(eq,getJacobian,parameters=parameters)
+    # if(sum(abs(Re(eq[[1]])-testEq(Re(eq[[1]]),parameters)))>1){
+    #   J <- getJacobian(Re(eq[[1]]),parameters)
+    #   if(getStability(eq[[1]],J)!=3){
+    #     warning("Computed equilibrium seems to be incorrect? (different from numerical system solved at large t starting at eq)")
+    #   }
+    # } else if(sum(abs(Re(eq[[2]])-testEq(Re(eq[[2]]),parameters)))>1){
+    #   J <- getJacobian(Re(eq[[2]]),parameters)
+    #   if(getStability(eq[[2]],J)!=3){
+    #     warning("Computed equilibrium seems to be incorrect? (different from numerical system solved at large t starting at eq)")
+    #   }
+    # } else if(sum(abs(Re(eq[[3]])-testEq(Re(eq[[3]]),parameters)))>1){
+    #   warning("Computed equilibrium 3 seems to be incorrect? (different from numerical system solved at large t starting at eq)")
+    #   J <- getJacobian(Re(eq[[3]]),parameters)
+    #   if(getStability(eq[[3]],J)!=3){
+    #     warning("Computed equilibrium seems to be incorrect? (different from numerical system solved at large t starting at eq)")
+    #   }
+    #   # print(sum(abs(eq[[3]]-testEq(eq[[3]],parameters))))
+    # }
+    eqre <- lapply(eq,Re)
+    J <- lapply(eqre,getJacobian,parameters=parameters)
     return(mapply(getStability,eq,J))
   }
 
@@ -192,8 +192,8 @@ eqStability(1e6,0.1,eq_type="C")
 
 
 
-phi_range <- (10^seq(-2,5,0.1))
-v0_range <- 10^seq(0,12,0.1)
+phi_range <- (10^seq(-2,5,0.02))
+v0_range <- 10^seq(0,12,0.02)
 
 # pv_combos <- expand.grid(phi_range,v0_range)
 # names(pv_combos) <- c("phi","v0")
@@ -210,7 +210,6 @@ x <- mapply(eqStability,phi=pv_combos$phi,v0=pv_combos$v0,MoreArgs = list(eq_typ
 table(x)
 pv_combos$M <- x
 M_mat <- reshape(pv_combos, idvar = "phi", timevar = "v0", direction = "wide")
-
 pv_combos <- expand.grid(phi_range,v0_range)
 names(pv_combos) <- c("phi","v0")
 x <- mapply(eqStability,phi=pv_combos$phi,v0=pv_combos$v0,MoreArgs = list(eq_type="C"))
@@ -219,13 +218,86 @@ table(x[2,])
 table(x[3,])
 pv_combos$C <- x[3,]
 C_mat <- reshape(pv_combos, idvar = "phi", timevar = "v0", direction = "wide")
-
-
-eq_mat <- C_mat[,-1] == 1
+eq_mat <- C_mat[,-1] == 1 & M_mat[,-1] != 1
 eq_mat[C_mat[,-1] == 1 & M_mat[,-1] == 1] <- 2
 eq_mat[C_mat[,-1] != 1 & M_mat[,-1] == 1] <- 3
 eq_mat_rev <- eq_mat[nrow(eq_mat):1,]
 
+pv_combos <- expand.grid(phi_range,v0_range)
+names(pv_combos) <- c("phi","v0")
+x <- mapply(eqStability,phi=pv_combos$phi,v0=pv_combos$v0,MoreArgs = list(eq_type="M",k=0.05))
+table(x)
+pv_combos$M <- x
+M_mat <- reshape(pv_combos, idvar = "phi", timevar = "v0", direction = "wide")
+pv_combos <- expand.grid(phi_range,v0_range)
+names(pv_combos) <- c("phi","v0")
+x <- mapply(eqStability,phi=pv_combos$phi,v0=pv_combos$v0,MoreArgs = list(eq_type="C",k=0.05))
+table(x[1,])
+table(x[2,])
+table(x[3,])
+pv_combos$C <- x[3,]
+C_mat <- reshape(pv_combos, idvar = "phi", timevar = "v0", direction = "wide")
+eq_mat <- C_mat[,-1] == 1 & M_mat[,-1] != 1
+eq_mat[C_mat[,-1] == 1 & M_mat[,-1] == 1] <- 2
+eq_mat[C_mat[,-1] != 1 & M_mat[,-1] == 1] <- 3
+eq_mat_rev_intermediatecost <- eq_mat[nrow(eq_mat):1,]
+
+pv_combos <- expand.grid(phi_range,v0_range)
+names(pv_combos) <- c("phi","v0")
+x <- mapply(eqStability,phi=pv_combos$phi,v0=pv_combos$v0,MoreArgs = list(eq_type="M",k=0.1))
+table(x)
+pv_combos$M <- x
+M_mat <- reshape(pv_combos, idvar = "phi", timevar = "v0", direction = "wide")
+pv_combos <- expand.grid(phi_range,v0_range)
+names(pv_combos) <- c("phi","v0")
+x <- mapply(eqStability,phi=pv_combos$phi,v0=pv_combos$v0,MoreArgs = list(eq_type="C",k=0.1))
+table(x[1,])
+table(x[2,])
+table(x[3,])
+pv_combos$C <- x[3,]
+C_mat <- reshape(pv_combos, idvar = "phi", timevar = "v0", direction = "wide")
+eq_mat <- C_mat[,-1] == 1 & M_mat[,-1] != 1
+eq_mat[C_mat[,-1] == 1 & M_mat[,-1] == 1] <- 2
+eq_mat[C_mat[,-1] != 1 & M_mat[,-1] == 1] <- 3
+eq_mat_rev_highcost <- eq_mat[nrow(eq_mat):1,]
+
+pv_combos <- expand.grid(phi_range,v0_range)
+names(pv_combos) <- c("phi","v0")
+x <- mapply(eqStability,phi=pv_combos$phi,v0=pv_combos$v0,MoreArgs = list(eq_type="M",k=0.2))
+table(x)
+pv_combos$M <- x
+M_mat <- reshape(pv_combos, idvar = "phi", timevar = "v0", direction = "wide")
+pv_combos <- expand.grid(phi_range,v0_range)
+names(pv_combos) <- c("phi","v0")
+x <- mapply(eqStability,phi=pv_combos$phi,v0=pv_combos$v0,MoreArgs = list(eq_type="C",k=0.2))
+table(x[1,])
+table(x[2,])
+table(x[3,])
+pv_combos$C <- x[3,]
+C_mat <- reshape(pv_combos, idvar = "phi", timevar = "v0", direction = "wide")
+eq_mat <- C_mat[,-1] == 1 & M_mat[,-1] != 1
+eq_mat[C_mat[,-1] == 1 & M_mat[,-1] == 1] <- 2
+eq_mat[C_mat[,-1] != 1 & M_mat[,-1] == 1] <- 3
+eq_mat_rev_highcostx2 <- eq_mat[nrow(eq_mat):1,]
+
+pv_combos <- expand.grid(phi_range,v0_range)
+names(pv_combos) <- c("phi","v0")
+x <- mapply(eqStability,phi=pv_combos$phi,v0=pv_combos$v0,MoreArgs = list(eq_type="M",k=0.4))
+table(x)
+pv_combos$M <- x
+M_mat <- reshape(pv_combos, idvar = "phi", timevar = "v0", direction = "wide")
+pv_combos <- expand.grid(phi_range,v0_range)
+names(pv_combos) <- c("phi","v0")
+x <- mapply(eqStability,phi=pv_combos$phi,v0=pv_combos$v0,MoreArgs = list(eq_type="C",k=0.4))
+table(x[1,])
+table(x[2,])
+table(x[3,])
+pv_combos$C <- x[3,]
+C_mat <- reshape(pv_combos, idvar = "phi", timevar = "v0", direction = "wide")
+eq_mat <- C_mat[,-1] == 1 & M_mat[,-1] != 1
+eq_mat[C_mat[,-1] == 1 & M_mat[,-1] == 1] <- 2
+eq_mat[C_mat[,-1] != 1 & M_mat[,-1] == 1] <- 3
+eq_mat_rev_highcostx4 <- eq_mat[nrow(eq_mat):1,]
 
 x <- rev(1/phi_range)
 xtick <- 10^(seq(-5,2,2))
@@ -233,44 +305,74 @@ x <- log(x)
 y <- v0_range
 ytick <- 10^(seq(0,12,3))
 y <- log(y)
-pdf(paste0("ModelEquilibria_contour.pdf"),width=8,height=5)
+pdf(paste0("ModelEquilibria_contour.pdf"),width=6,height=4)
 par(mar=c(5.1, 5, 1, 0.2))
 filled.contour(x=x,
                y=y,
                z=eq_mat_rev,
-               xlab=expression("Lag Length (" * 1/phi * ")"),
-               ylab=expression("Envrionmental Viral Pool (" * v[0] * ")"),
+               xlab=expression("Lag Length (" * 1/phi * "; hours)"),
+               ylab=expression("Envrionmental Viral Pool (" * v[0] * "; viruses/mL)"),
                levels=c(0,1.5,2.5,4),
                col = wes_palette("Moonrise3",3),
-               cex.lab=1.5,
-               cex.axis=1.5,
+               cex.lab=1,
+               cex.axis=1,
                plot.axes = {axis(1, at=log(xtick), label=xtick);
-                            axis(2, at=log(ytick), label=ytick)
+                 axis(2, at=log(ytick), label=ytick);
                  contour(x=x,
                          y=y,
                          z=eq_mat_rev,
-                         levels=c(0,1.5,2.5,4), 
-                         lwd=1, 
-                         drawlabels = F, axes = FALSE, 
+                         levels=c(0,1.5,2.5,4),
+                         lwd=3,
+                         drawlabels = T,
+                         axes = FALSE,
+                         frame.plot = FALSE,
+                         add = TRUE,
+                         labels = "kappa = 0.01",
+                         labcex=0.4,
+                         col=c("darkgreen","darkblue"));
+                 contour(x=x,
+                         y=y,
+                         z=eq_mat_rev_intermediatecost,
+                         levels=c(0,1.5,2.5,4), lwd=1,
+                         labels = "kappa = 0.05",
+                         labcex=0.4,
+                         drawlabels = T, axes = FALSE,
                          frame.plot = FALSE, add = TRUE,
-                         labels = "Cost of SM = 0.01",
-                         col="black")
-                 contour(x=log10(phi_range), 
-                         y=log10(v0_range),
-                         z=as.matrix(x[[1]]), 
-                         levels = 1, lwd=2, labels = "Cost of SM = 0.001",
-                         drawlabels = T, axes = FALSE, 
-                         frame.plot = FALSE, add = TRUE,labcex=1);
-                 contour(x=log10(phi_range),
-                         y=log10(v0_range),
-                         z=as.matrix(x[[3]]), 
-                         levels = 1, lwd=2, labels = "Cost of SM = 0.1",
-                         drawlabels = T, axes = FALSE, 
-                         frame.plot = FALSE, add = TRUE,labcex=1);
-                 text(x=2,y=7,labels="CRISPR Only",cex=1.25)
-                 text(x=2,y=19,labels="SM Only",cex=1.25)
-                 text(x=2,y=13,labels="CRISPR or SM",cex=1.25)
-                 text(x=-3,y=23.6,labels=expression(v[0] * "=" * 10^9),cex=0.8)
-                 abline(h=log(1e9),lty=2,lwd=2)})
+                         col=c("darkgreen","darkblue"));
+                 contour(x=x,
+                         y=y,
+                         z=eq_mat_rev_highcost,
+                         levels=c(0,1.5,2.5,4), lwd=1,
+                         labels = "kappa = 0.1",
+                         labcex=0.4,
+                         drawlabels = T, axes = FALSE,
+                         frame.plot = FALSE, add = TRUE,
+                         col=c("darkgreen","darkblue"));
+                 contour(x=x,
+                         y=y,
+                         z=eq_mat_rev_highcostx2,
+                         levels=c(0,1.5,2.5,4), lwd=1,
+                         labels = "kappa = 0.2",
+                         labcex=0.4,
+                         drawlabels = T, axes = FALSE,
+                         frame.plot = FALSE, add = TRUE,
+                         col=c("darkgreen","darkblue"));
+                 contour(x=x,
+                         y=y,
+                         z=eq_mat_rev_highcostx4,
+                         levels=c(0,1.5,2.5,4), lwd=1,
+                         labels = "kappa = 0.4",
+                         labcex=0.4,
+                         drawlabels = T, axes = FALSE,
+                         frame.plot = FALSE, add = TRUE,
+                         col=c("darkgreen","darkblue"));
+                 # text(x=2,y=7,labels="CRISPR Only",cex=1);
+                 # text(x=2,y=19,labels="SM Only",cex=1);
+                 # text(x=2,y=13,labels="CRISPR or SM",cex=1);
+                 text(x=-3,y=23.6,labels=expression(v[0] * "=" * 10^9),cex=0.5);
+                 abline(h=log(1e9),lty=2,lwd=1)})
 par(mar=c(5.1, 4.1, 4.1, 2.1))
 dev.off()
+
+
+
