@@ -118,6 +118,20 @@ plotOut <- function(out,main=""){
   par(mar=c(5.1, 4.1, 4.1, 2.1))
 }
 
+# Helper function to plot model output w/ CRISPR defended combined
+plotOutCombine <- function(out,main=""){
+  par(mar=c(5.1, 5, 4.1, 1))
+  plot(out[,"time"],out[,"U"],type="l",
+       log="y",ylim=c(1,1e11),lwd=2,main=main,
+       xlab="Time (hours)",ylab="Density",
+       cex.axis=1.5,cex.lab=1.5,cex.main=2)
+  lines(out[,"time"],out[,"I"],col="black",lty=2,lwd=3)
+  lines(out[,"time"],out[,"D"]+out[,"Id"],col=pal_npg("nrc")(6)[4],lwd=5)
+  lines(out[,"time"],out[,"SM"],col=pal_npg("nrc")(6)[3],lwd=5)
+  lines(out[,"time"],out[,"V"],col=pal_npg("nrc")(6)[1],lwd=5)
+  par(mar=c(5.1, 4.1, 4.1, 2.1))
+}
+
 
 # Time range and initial conditions for numerical soln
 times <- seq(0, 24, by = 1)
@@ -157,6 +171,16 @@ par(mfrow=c(1,3))
 plotOut(out_immunization_nolag,main=expression("Outbreak, No Lag"))
 plotOut(out_immunization_shortlag,main=expression("Outbreak, Short Lag"))
 plotOut(out_immunization_longlag,main=expression("Outbreak, Long Lag"))
+par(mfrow=c(1,3))
+dev.off()
+
+# Plot
+setwd("~/immunelag/Fig4")
+pdf(paste0("ImmunizationLagCombine.pdf"),width=12,height=4)
+par(mfrow=c(1,3))
+plotOutCombine(out_immunization_nolag,main=expression("Outbreak, No Lag"))
+plotOutCombine(out_immunization_shortlag,main=expression("Outbreak, Short Lag"))
+plotOutCombine(out_immunization_longlag,main=expression("Outbreak, Long Lag"))
 par(mfrow=c(1,3))
 dev.off()
 
