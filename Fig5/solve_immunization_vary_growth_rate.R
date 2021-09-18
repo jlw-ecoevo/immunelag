@@ -8,6 +8,7 @@ library(scales)
 library(dplyr)
 library(ggplot2)
 library(ggpubr)
+library(ggthemes)
 library(wesanderson)
 
 autoimmunitySystem <- function(t, state, parameters) {
@@ -157,20 +158,21 @@ for(i in 1:length(v_range)){
 p1 <- ggplot(v_df,aes(x=Time,y=RelFit,color=factor(v))) +
   geom_line(size=1.5) +
   scale_y_log10(limit=c(1e-10,1e3)) +
-  theme_pubclean() +
+  theme_base() +
   geom_hline(yintercept=1,lty=2) +
   labs(color="Max. Growth Rate (v)") +
   ylab("Relative Fitness CRISPR x SM") +
   xlab("Time (Hours)") +
   scale_color_manual(values = wes_palette("Zissou1")) +
   theme(legend.position = "none",
-        text = element_text(size=14)) +
+        text = element_text(size=14),
+        plot.title = element_text(hjust = 0.5)) +
   ggtitle("With Lag")
 
 p2 <- ggplot(vnl_df,aes(x=Time,y=RelFit,color=factor(v))) +
   geom_line(size=1.5) +
   scale_y_log10(limit=c(1e0,1e1)) +
-  theme_pubclean() +
+  theme_base() +
   geom_hline(yintercept=1,lty=2) +
   labs(color="Max. Growth Rate (v)") +
   ylab("Relative Fitness CRISPR x SM") +
@@ -178,7 +180,8 @@ p2 <- ggplot(vnl_df,aes(x=Time,y=RelFit,color=factor(v))) +
   scale_color_manual(values = wes_palette("Zissou1")) +
   theme(legend.position = c(0.35,0.7),
         text = element_text(size=14),
-        legend.background = element_rect(size = 0.5, colour = 1)) +
+        legend.background = element_rect(size = 0.5, colour = 1),
+        plot.title = element_text(hjust = 0.5)) +
   ggtitle("No Lag")
 
 setwd("~/immunelag/Fig5")
@@ -210,20 +213,21 @@ for(i in 1:length(v_range)){
 p1 <- ggplot(v_df,aes(x=Time,y=RelFit,color=factor(v))) +
   geom_line(size=1.5) +
   scale_y_log10(limit=c(1e-8,1e3)) +
-  theme_pubclean() +
+  theme_base() +
   geom_hline(yintercept=1,lty=2) +
   labs(color="Max. Growth Rate (v)") +
   ylab("Relative Fitness CRISPR x SM") +
   xlab("Time (Hours)") +
   scale_color_manual(values = wes_palette("Zissou1")) +
   theme(legend.position = "none",
-        text = element_text(size=14)) +
+        text = element_text(size=14),
+        plot.title = element_text(hjust = 0.5)) +
   ggtitle("With Lag") 
 
 p2 <- ggplot(vnl_df,aes(x=Time,y=RelFit,color=factor(v))) +
   geom_line(size=1.5) +
   scale_y_log10(limit=c(1e0,1e1)) +
-  theme_pubclean() +
+  theme_base() +
   geom_hline(yintercept=1,lty=2) +
   labs(color="Max. Growth Rate (v)") +
   ylab("Relative Fitness CRISPR x SM") +
@@ -231,7 +235,8 @@ p2 <- ggplot(vnl_df,aes(x=Time,y=RelFit,color=factor(v))) +
   scale_color_manual(values = wes_palette("Zissou1")) +
   theme(legend.position = c(0.35,0.7),
         text = element_text(size=14),
-        legend.background = element_rect(size = 0.5, colour = 1)) +
+        legend.background = element_rect(size = 0.5, colour = 1),
+        plot.title = element_text(hjust = 0.5)) +
   ggtitle("No Lag")
 
 setwd("~/immunelag/Fig5")
